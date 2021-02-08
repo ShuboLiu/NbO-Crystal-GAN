@@ -3,12 +3,24 @@ import pandas as pd
 import ase
 
 def do_translation(orig_structure, number_of_output):
-    print("Doing translation")
-    structures = np.zeros(((number_of_output, 3, 8)))
+    structures = np.zeros(((number_of_output, 8, 3)))
     for i in range(1, number_of_output):
         delta = np.random.uniform(0, 1, size = 3).reshape(1, 3)
-        #structure = delta + orig_structure
+        structure = np.zeros((8, 3))
+        structure = np.array(structure)
+        for ii in range(2, len(orig_structure)):
+            structure[ii, :] = delta + orig_structure[ii, :]
         structures[i, :, :] = structure
+    return structures
+
+def do_rotation(orig_structure):
+    structures = np.zeros(((6, 8, 3)))
+    structures[0, :, :] = orig_structure[:, [0, 1, 2]]
+    structures[1, :, :] = orig_structure[:, [0, 2, 1]]
+    structures[2, :, :] = orig_structure[:, [1, 0, 2]]
+    structures[3, :, :] = orig_structure[:, [1, 2, 0]]
+    structures[4, :, :] = orig_structure[:, [2, 0, 1]]
+    structures[5, :, :] = orig_structure[:, [2, 1, 0]]
     return structures
 
 #读入数据并变为三维数组
@@ -16,23 +28,39 @@ def do_translation(orig_structure, number_of_output):
 每个结构都是一个二维数组
 73*3*8结构
 """
-strcture_data = pd.read_csv(r"NbO_structure_file.csv")
-struc_data = np.zeros(((73, 8, 3)))
-for i in range(len(strcture_data)):
+structure_data = pd.read_csv(r"NbO_structure_file.csv")
+struc_data = np.zeros(((len(structure_data), 8, 3)))
+for i in range(len(structure_data)):
     print("Reading file No.", i)
     count = 0
     for ii in range(7):
         for iii in range(2):
-            struc_data[i, ii, iii] = strcture_data.iat[i, count]
+            struc_data[i, ii, iii] = structure_data.iat[i, count]
             count += 1
-
-print(struc_data)
 
 ## 开始做平移变换
 """
 input: 初始结构3*8矩阵（一个）
 output：平移结构3*8矩阵（一堆）
+ATT: 结构中一般不包含原始结构
 """
-num_output_stru = 200
+num_output_stru_trans = 200
+trans_struc_data = np.zeros((((len(structure_data), num_output_stru_trans, 8, 3))))
 for i in range(len(struc_data)):
-    trans_struc_data = do_translation(struc_data[i, :, :], num_output_stru)
+    trans_struc_data[i, :, :, :] = do_translation(struc_data[i, :, :], num_output_stru_trans)
+
+print("Successfully augment data by", num_output_stru_trans, "times via translation")
+print("Output matrix has shape of",trans_struc_data.shape)
+
+## 开始做旋转变换
+"""
+input: 初始结构3*8矩阵（一个）
+output：平移结构3*8矩阵（六个）
+ATT：结构中一般包含原始结构
+"""
+
+rot_struc_data = np.zeros((((len(structure_data), 6, 8, 3))))
+for i in range(len(struc_data)):
+    rot_struc_data[i, :, :, :] = do_rotation(struc_data[i, :, :])
+print("Successfully augment data by", 6, "times via rotation")
+print("Output matrix has shape of", rot_struc_data.shape)
