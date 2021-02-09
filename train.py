@@ -119,7 +119,7 @@ def main():
     parser.add_argument('--load_q', type = str)
     parser.add_argument('--constraint_epoch', type = int, default = 10000)
     parser.add_argument('--gen_dir', type=str, default='./gen/')
-    parser.add_argument('--trainingdata', type=str, default='mgmno_2000.pickle')
+    #parser.add_argument('--trainingdata', type=str, default='mgmno_2000.pickle')
     parser.add_argument('--input_dim', type=str, default=512+28+1)
     opt = parser.parse_args()
     print(opt)
