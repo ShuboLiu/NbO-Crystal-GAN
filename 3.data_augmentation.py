@@ -50,7 +50,7 @@ for i in range(len(struc_data)):
     trans_struc_data[i, :, :, :] = do_translation(struc_data[i, :, :], num_output_stru_trans)
 
 print("Successfully augment data by", num_output_stru_trans, "times via translation")
-print("Output matrix has shape of",trans_struc_data.shape)
+print("Output matrix after translation has shape of",trans_struc_data.shape)
 
 ## 开始做旋转变换
 """
@@ -63,4 +63,10 @@ rot_struc_data = np.zeros((((len(structure_data), 6, 8, 3))))
 for i in range(len(struc_data)):
     rot_struc_data[i, :, :, :] = do_rotation(struc_data[i, :, :])
 print("Successfully augment data by", 6, "times via rotation")
-print("Output matrix has shape of", rot_struc_data.shape)
+print("Output matrix after rotation operation has shape of", rot_struc_data.shape)
+
+final_struc_data = np.zeros((((len(struc_data), num_output_stru_trans + 6, 8, 3))))
+for i in range(len(struc_data)):
+    final_struc_data[i, :, :, :] = np.concatenate((trans_struc_data[i, :, :, :], rot_struc_data[i, :, :, :]),axis=0)
+print("Final output matrix has shape of", final_struc_data.shape)
+np.save("3.data_augmentation.npy", final_struc_data)
