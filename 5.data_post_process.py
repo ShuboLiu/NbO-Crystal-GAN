@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np 
 import xlrd
 import os, sys
+import shutil
 
-os.removedirs("/OUTPUT")
+shutil.rmtree("OUTPUT")
 
 raw_data = np.load(r"fake_imgs_gen.npy")
 print("We have raw data of shape",raw_data.shape)
@@ -42,7 +43,8 @@ for i in range(len(data)):
 """
 
 ## 数据转存为POSCAR文件
-print(data.shape)
+print("Shape of potential POSCAR file is", data.shape)
+os.mkdir("OUTPUT")
 for i in range(data.shape[0]):
     out_dir = "NbO_" + str(i)
     cur_path = os.path.abspath(os.curdir)
@@ -50,11 +52,11 @@ for i in range(data.shape[0]):
     with open(out_name, 'w') as f:
         f.write('Nb O \n') 
         f.write('1.0 \n') 
-        for j in range(2, 4):
+        for j in range(0, 3):
             f.write(str(data[i, j, :]) + ' \n') 
         f.write('Nb O \n')
         f.write('3 3 \n')
         f.write('Direct \n')
-        for j in range(2, 8):
+        for j in range(3, 9):
             if abs(sum(data[i, j, :])) < 1000:
                 f.write(str(data[i, j, :]) + ' \n')
