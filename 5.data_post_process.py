@@ -58,5 +58,4 @@ for i in range(data.shape[0]):
         f.write('3 3 \n')
         f.write('Direct \n')
         for j in range(3, 9):
-            if abs(sum(data[i, j, :])) < 1000:
-                f.write(str(data[i, j, :]) + ' \n')
+            f.write(str(data[i, j, :]) + ' \n')

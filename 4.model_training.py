@@ -16,6 +16,9 @@ import torch.nn.functional as F
 import torch.autograd as autograd
 import torch
 
+import matplotlib.pyplot as plt
+import time
+
 os.makedirs("images", exist_ok=True)
 
 parser = argparse.ArgumentParser()
@@ -156,6 +159,7 @@ np.set_printoptions(threshold=np.inf)
 
 batches_done = 0
 fake_imgs_save = np.empty(((1, 8, 3)))
+gloss = []; dloss = []
 for epoch in range(opt.n_epochs):
     for i, (imgs) in enumerate(dataloader):
 
@@ -212,6 +216,8 @@ for epoch in range(opt.n_epochs):
                 "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
                 % (epoch, opt.n_epochs, i, len(dataloader), d_loss.item(), g_loss.item())
             )
+            gloss.append(g_loss.item())
+            dloss.append(d_loss.item())
 
             if batches_done % opt.sample_interval == 0:
                 #print("Good")
@@ -225,3 +231,15 @@ for epoch in range(opt.n_epochs):
 
 print("We have the fake generation of shape", fake_imgs_save.shape)
 np.save("fake_imgs_gen.npy", fake_imgs_save)
+
+plt.subplot(2, 1, 1)
+plt.plot(gloss, '.')
+plt.ylabel('G_loss')
+plt.subplot(2, 1, 2)
+plt.plot(dloss, '.')
+plt.ylabel('D_loss')
+now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+image_name="loss_image_"+now+r".jpg"
+plt.savefig(image_name)
+plt.show()
+print("All Done")
