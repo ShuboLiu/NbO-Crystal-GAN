@@ -8,6 +8,8 @@ print("We have raw data of shape",raw_data.shape)
 
 """
 此处应该加入数据修正部分代码
+1. a b c应该大于0
+2. alpha beta gamma应该大于0
 """
 
 ## 数据转存为POSCAR文件
