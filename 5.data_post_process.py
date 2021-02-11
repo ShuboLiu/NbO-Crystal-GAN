@@ -7,6 +7,11 @@ raw_data = np.load(r"fake_imgs_gen.npy")
 print("We have raw data of shape",raw_data.shape)
 
 """
+数据转换
+将晶格常数转换为晶格矢量
+"""
+
+"""
 此处应该加入数据修正部分代码
 1. a b c应该大于0
 2. alpha beta gamma应该大于0

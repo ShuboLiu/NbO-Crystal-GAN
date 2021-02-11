@@ -205,8 +205,8 @@ for epoch in range(opt.n_epochs):
             )
 
             if batches_done % opt.sample_interval == 0:
-                print("Good")
-            if abs(d_loss.item()) < 0.1 and abs(g_loss.item()) < 0.1:
+                #print("Good")
+            #if abs(d_loss.item()) < 0.1 and abs(g_loss.item()) < 0.1:
                 fake_imgs = fake_imgs.cpu()
                 fake_imgs_raw = fake_imgs.detach().numpy()
                 fake_imgs_save = np.concatenate((fake_imgs_save, fake_imgs_raw), axis=0)
