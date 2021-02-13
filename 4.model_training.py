@@ -19,8 +19,6 @@ import torch
 import matplotlib.pyplot as plt
 import time
 
-os.makedirs("images", exist_ok=True)
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_epochs", type=int, default=500, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
@@ -149,6 +147,15 @@ def compute_gradient_penalty(D, real_samples, fake_samples):
     return gradient_penalty
 
 
+def get_z():
+    delta = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
+    NbO_ground = imgs
+    # NbO_array = []
+    # for k in range(len(delta)):
+    #     NbO_array.append(NbO_ground)
+    z = delta + Tensor(NbO_ground)
+    return z
+
 # ----------
 #  Training
 # ----------
@@ -173,8 +180,9 @@ for epoch in range(opt.n_epochs):
         optimizer_D.zero_grad()
 
         # Sample noise as generator input
-        z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
-        
+        #z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
+        z = get_z()
+
         #print("z.shape=", z.shape)
         # Generate a batch of images
         fake_imgs = generator(z)
@@ -238,7 +246,7 @@ plt.ylabel('G_loss')
 plt.subplot(2, 1, 2)
 plt.plot(dloss, '.')
 plt.ylabel('D_loss')
-now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) 
 image_name="loss_image_"+now+r".jpg"
 plt.savefig(image_name)
 plt.show()
