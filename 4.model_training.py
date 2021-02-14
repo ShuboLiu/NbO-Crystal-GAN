@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=500, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
@@ -41,58 +41,107 @@ img_shape = (opt.channels, opt.img_size_0, opt.img_size_1)
 cuda = True if torch.cuda.is_available() else False
 
 
+# class Generator(nn.Module):
+#     def __init__(self):
+#         super(Generator, self).__init__()
+
+#         def block(in_feat, out_feat, normalize=False): #Ture改为False
+#             layers = [nn.Linear(in_feat, out_feat)]
+#             if normalize:
+#                 layers.append(nn.BatchNorm1d(out_feat, 0.8))
+#             layers.append(nn.LeakyReLU(0.2, inplace=True))
+#             return layers
+
+#         self.model = nn.Sequential(
+#             *block(opt.latent_dim, 128, normalize=False),
+#             *block(128, 256),
+#             *block(256, 512),
+#             *block(512, 1024),
+#             *block(1024, 512),
+#             *block(512, 256),
+#             *block(256, 128),
+#             *block(128, 256),
+#             *block(256, 512),
+#             *block(512, 1024),
+#             *block(1024, 512),
+#             *block(512, 256),
+#             *block(256, 128),
+#             nn.Linear(128, int(np.prod(img_shape))),
+#             nn.Tanh()
+#         )
+
+#     def forward(self, z):
+#         img = self.model(z)
+#         img = img.view(img.shape[0], 8,3) ##将*img_shape改为1,8,3
+#         based_on_ground = True
+#         if based_on_ground :
+#             ground = imgs[np.random.randint(0, opt.batch_size), :, :]
+#             ground = ground.cuda().to(torch.float32)
+#             img = img + ground
+#         return img
+
 class Generator(nn.Module):
-    def __init__(self):
+     def __init__(self):
         super(Generator, self).__init__()
-
-        def block(in_feat, out_feat, normalize=False): #Ture改为False
-            layers = [nn.Linear(in_feat, out_feat)]
-            if normalize:
-                layers.append(nn.BatchNorm1d(out_feat, 0.8))
-            layers.append(nn.LeakyReLU(0.2, inplace=True))
-            return layers
-
-        self.model = nn.Sequential(
-            *block(opt.latent_dim, 128, normalize=False),
-            *block(128, 256),
-            *block(256, 512),
-            *block(512, 1024),
-            *block(1024, 512),
-            *block(512, 256),
-            *block(256, 128),
-            nn.Linear(128, int(np.prod(img_shape))),
-            nn.Tanh()
-        )
-
-    def forward(self, z):
-        img = self.model(z)
-        img = img.view(img.shape[0], 8,3) ##将*img_shape改为8,3
-        ground = imgs[np.random.randint(0, opt.batch_size), :, :]
-        ground = ground.cuda().to(torch.float32)
-        img = img + ground
+        self.conv1 = nn.Sequential( #input shape (1,28,28)
+            nn.Conv2d(in_channels=1, #input height 
+                      out_channels=16, #n_filter
+                      kernel_size=1, #filter size
+                      stride=1, #filter step
+                      padding=0 #con2d出来的图片大小不变
+                      ), #output shape (16,28,28)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=1) #2x2采样，output shape (16,14,14)
+            )
+        self.conv2 = nn.Sequential(nn.Conv2d(16, 32, 1, 1, 0), #output shape (32,7,7)
+                                   nn.ReLU(),
+                                   nn.MaxPool2d(1))
+        self.out = nn.Linear(768, 24)
+         
+     def forward(self, x):
+        x = imgs.view(opt.batch_size, 1, 8, 3).cuda().to(torch.float32)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = x.view(x.size(0), -1)
+        output = self.out(x)
+        img = output.reshape(opt.batch_size, 8, 3)
+        based_on_ground = True
+        if based_on_ground :
+            ground = imgs[np.random.randint(0, opt.batch_size), :, :]
+            ground = ground.cuda().to(torch.float32)
+            img = img + ground
         return img
-
 
 class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
 
+        # self.model = nn.Sequential(
+        #     nn.Linear(int(np.prod(img_shape)), 512),
+        #     nn.LeakyReLU(0.2, inplace=True),
+        #     nn.Linear(512, 256),
+        #     nn.LeakyReLU(0.2, inplace=True),
+        #     nn.Linear(256, 128),
+        #     nn.LeakyReLU(0.2, inplace=True),
+        #     nn.Linear(128, 256),
+        #     nn.LeakyReLU(0.2, inplace=True),
+        #     nn.Linear(256, 512),
+        #     nn.LeakyReLU(0.2, inplace=True),
+        #     nn.Linear(512, 1),
+        # )
         self.model = nn.Sequential(
-            nn.Linear(int(np.prod(img_shape)), 512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(512, 256),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(256, 128),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(128, 256),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(256, 512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(512, 1),
-        )
+            nn.Conv2d(in_channels = 1, out_channels = 512, kernel_size = (1,3), stride = 1, padding = 0),
+            nn.BatchNorm2d(512,0.8),nn.LeakyReLU(0.2,inplace=True),
+            nn.Conv2d(in_channels = 512, out_channels = 256, kernel_size = (1,1), stride = 1, padding = 0),
+            nn.BatchNorm2d(256,0.8),nn.LeakyReLU(0.2,inplace=True),
+            nn.Conv2d(in_channels = 256, out_channels = 256, kernel_size= (1,1), stride = 1, padding = 0),
+            nn.BatchNorm2d(256,0.8),nn.LeakyReLU(0.2,inplace=True),
+            nn.Conv2d(in_channels = 256, out_channels = 2, kernel_size = (1,1), stride =1, padding =0)
+            )
+        self.softmax = nn.Softmax2d()
 
     def forward(self, img):
-        img_flat = img.view(img.shape[0], -1)
+        img_flat = img.view(img.shape[0], 1, 8, 3)
         validity = self.model(img_flat)
         return validity
 
@@ -128,24 +177,24 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 def compute_gradient_penalty(D, real_samples, fake_samples):
     """Calculates the gradient penalty loss for WGAN GP"""
     # Random weight term for interpolation between real and fake samples
-    alpha = Tensor(np.random.random((real_samples.size(0), 1, 1)))##将real_samples.size(0), 1, 1, 1改为real_samples.size(0), 1, 1
+    batch_size = real_samples.size(0)
+    alpha = torch.rand(batch_size, 1)
+    #alpha = alpha.expand(batch_size, int(real_samples.nelement()/batch_size)).contiguous().view(batch_size, 1, 8 , 3)
+    alpha = Tensor(np.random.random((real_samples.size(0), 1, 1)))
+    alpha = alpha.cuda() if cuda else alpha
     # Get random interpolation between real and fake samples
-    interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-    d_interpolates = D(interpolates)
-    fake = Variable(Tensor(real_samples.shape[0], 1).fill_(1.0), requires_grad=False)
-    # Get gradient w.r.t. interpolates
-    gradients = autograd.grad(
-        outputs=d_interpolates,
-        inputs=interpolates,
-        grad_outputs=fake,
-        create_graph=True,
-        retain_graph=True,
-        only_inputs=True,
-    )[0]
+    interpolates = alpha * real_samples + ((1 - alpha) * fake_samples)
+    if cuda:
+        interpolates = interpolates.cuda()
+    interpolates = autograd.Variable(interpolates, requires_grad=True)
+    disc_interpolates = D(interpolates)
+    gradients = autograd.grad(outputs=disc_interpolates, inputs=interpolates,
+                              grad_outputs=torch.ones(disc_interpolates.size()).cuda() if cuda else torch.ones(
+                                  disc_interpolates.size()),
+                              create_graph=True, retain_graph=True, only_inputs=True)[0]
     gradients = gradients.view(gradients.size(0), -1)
-    gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+    gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean() #* 10
     return gradient_penalty
-
 
 # ----------
 #  Training
@@ -157,7 +206,7 @@ np.set_printoptions(threshold=np.inf)
 
 batches_done = 0
 fake_imgs_save = train_data[0, :, :].reshape(((1, 8, 3)))
-gloss = []; dloss = []
+gloss = []; dloss = []; wloss = []
 for epoch in range(opt.n_epochs):
     for i, (imgs) in enumerate(dataloader):
 
@@ -215,10 +264,9 @@ for epoch in range(opt.n_epochs):
             )
             gloss.append(g_loss.item())
             dloss.append(d_loss.item())
+            wloss.append(Wasserstein_D)
 
             if batches_done % opt.sample_interval == 0:
-                #print("Good")
-            #if abs(d_loss.item()) < 0.1 and abs(g_loss.item()) < 0.1:
                 fake_imgs = fake_imgs.cpu()
                 fake_imgs_raw = fake_imgs.detach().numpy()
                 fake_imgs_save = np.concatenate((fake_imgs_save, fake_imgs_raw), axis=0)
@@ -230,12 +278,15 @@ print("We have the fake generation of shape", fake_imgs_save.shape)
 np.save("fake_imgs_gen.npy", fake_imgs_save)
 
 ## 保存Loss曲线
-plt.subplot(2, 1, 1)
+plt.subplot(3, 1, 1)
 plt.plot(gloss, '-')
 plt.ylabel('G_loss')
-plt.subplot(2, 1, 2)
+plt.subplot(3, 1, 2)
 plt.plot(dloss, '-')
 plt.ylabel('D_loss')
+plt.subplot(3, 1, 3)
+plt.plot(wloss, '-')
+plt.ylabel('W_loss')
 now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) 
 image_name="./loss_image/loss_image_"+now+r".jpg"
 plt.savefig(image_name)

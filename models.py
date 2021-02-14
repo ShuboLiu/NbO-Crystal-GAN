@@ -6,7 +6,7 @@ import torch
 class Generator(nn.Module):
     def __init__(self,opt):
         super(Generator, self).__init__()
-        input_dim = opt.latent_dim + 8 + 8 + 12 +1
+        input_dim = opt.latent_dim + 6 +1
         self.input_dim = opt.input_dim # 512+28+1
 
         self.l1 = nn.Sequential(nn.Linear(input_dim, 128*28),nn.ReLU(True))
@@ -21,7 +21,7 @@ class Generator(nn.Module):
     def forward(self, noise,c1,c2,c3,c4):
         gen_input = torch.cat((noise,c4,c1,c2,c3), -1)
         h = self.l1(gen_input)
-        h = h.view(h.shape[0], 128, 28, 1)
+        h = h.view(h.shape[0], 128, 6, 1)
         h = self.map1(h)
         h = self.map2(h)
         h = self.map3(h)

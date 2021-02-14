@@ -8,7 +8,6 @@ shutil.rmtree("OUTPUT")
 
 raw_data = np.load(r"fake_imgs_gen.npy")
 print("We have raw data of shape",raw_data.shape)
-print(raw_data)
 """
 数据转换
 将晶格常数转换为晶格矢量
@@ -34,7 +33,7 @@ for i in range(len(data)):
     data[i, 2, :] = vec_c[:]
 
     for j in range(2, raw_data.shape[1]):
-        data[i, j+1, :] = raw_data[i, j, :]
+        data[i, j+1, :] = raw_data[i, j, :]*10
 
 """
 此处应该加入数据修正部分代码

@@ -37,7 +37,7 @@ def noising(imgs):
     imgs = imgs.numpy()
     B = imgs.shape[0]
     mask = (imgs<0.01)
-    a = np.random.normal(10**-3,10**-2.5,(B,1,30,3))
+    a = np.random.normal(10**-3,10**-2.5,(B,1,8,3))
     noise = mask*abs(a)
     imgs_after_noising = imgs + noise
     imgs_after_noising = torch.tensor(imgs_after_noising)
@@ -75,7 +75,7 @@ def to_categorical(y, num_columns):
 def calc_gradient_penalty(netD, real_data, fake_data):
     batch_size = real_data.size(0)
     alpha = torch.rand(batch_size, 1)
-    alpha = alpha.expand(batch_size, int(real_data.nelement()/batch_size)).contiguous().view(batch_size, 1, 30 , 3)
+    alpha = alpha.expand(batch_size, int(real_data.nelement()/batch_size)).contiguous().view(batch_size, 1, 8 , 3)
     alpha = alpha.cuda() if cuda else alpha
 
     interpolates = alpha * real_data + ((1 - alpha) * fake_data)
@@ -190,15 +190,15 @@ def main():
         f_o = []
         f_c = []
         w = []
-        for j, (imgs,label) in enumerate(dataloader):
+        for j, imgs in enumerate(dataloader):
             print(j)
             batch_size = imgs.shape[0]
-            real_imgs = imgs.view(batch_size, 1, 30,3)
+            real_imgs = imgs.view(batch_size, 1, 8,3)
             real_imgs_noise = noising(real_imgs)
 			
             
-            Nb_label = label[:,:8,:]
-            o_label = label[:,16:,:]
+            #Nb_label = label[:,:3,:]
+            #o_label = label[:,3:,:]
             n_Nb = count_element(Nb_label).reshape(batch_size,)
             n_o = count_element(o_label).reshape(batch_size,)
             natoms = n_Nb + n_o
@@ -245,12 +245,12 @@ def main():
                 z = z.cuda()
                 
                 
-            fake_labels_Nb_int = np.random.randint(0, 8, batch_size)
-            fake_labels_Nb = to_categorical(fake_labels_Nb_int,num_columns = 8)
-            fake_labels_o_int = np.random.randint(0,12,batch_size)
-            fake_labels_o = to_categorical(fake_labels_o_int, num_columns = 12)
+            fake_labels_Nb_int = np.random.randint(0, 3, batch_size)
+            fake_labels_Nb = to_categorical(fake_labels_Nb_int,num_columns = 6)
+            fake_labels_o_int = np.random.randint(0,3,batch_size)
+            fake_labels_o = to_categorical(fake_labels_o_int, num_columns = 6)
             natoms_fake = fake_labels_Nb_int + fake_labels_o_int + 3
-            natoms_fake = Variable(FloatTensor(natoms_fake)/(28.0)).unsqueeze(-1)
+            natoms_fake = Variable(FloatTensor(natoms_fake)/(6.0)).unsqueeze(-1)
             
             if cuda:
                 fake_labels_Nb_int = torch.tensor(fake_labels_Nb_int).cuda()
