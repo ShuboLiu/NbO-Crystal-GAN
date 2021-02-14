@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=100, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
@@ -92,7 +92,6 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, img):
-        #print("img.shape=", img.shape)
         img_flat = img.view(img.shape[0], -1)
         validity = self.model(img_flat)
         return validity
@@ -130,10 +129,8 @@ def compute_gradient_penalty(D, real_samples, fake_samples):
     """Calculates the gradient penalty loss for WGAN GP"""
     # Random weight term for interpolation between real and fake samples
     alpha = Tensor(np.random.random((real_samples.size(0), 1, 1)))##将real_samples.size(0), 1, 1, 1改为real_samples.size(0), 1, 1
-    #print("alpha.shape=", alpha.shape)
     # Get random interpolation between real and fake samples
     interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-    #print("interpolates.shape=", interpolates.shape)
     d_interpolates = D(interpolates)
     fake = Variable(Tensor(real_samples.shape[0], 1).fill_(1.0), requires_grad=False)
     # Get gradient w.r.t. interpolates
@@ -149,15 +146,6 @@ def compute_gradient_penalty(D, real_samples, fake_samples):
     gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
     return gradient_penalty
 
-
-def get_z():
-    delta = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
-    NbO_ground = imgs
-    # NbO_array = []
-    # for k in range(len(delta)):
-    #     NbO_array.append(NbO_ground)
-    z = delta + Tensor(NbO_ground)
-    return z
 
 # ----------
 #  Training
@@ -185,10 +173,8 @@ for epoch in range(opt.n_epochs):
         # Sample noise as generator input
         z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
 
-        #print("z.shape=", z.shape)
         # Generate a batch of images
         fake_imgs = generator(z)
-        #print("fake_imgs.shape=", fake_imgs.shape)
 
         # Real images
         real_validity = discriminator(real_imgs)
@@ -242,6 +228,7 @@ for epoch in range(opt.n_epochs):
 print("We have the fake generation of shape", fake_imgs_save.shape)
 np.save("fake_imgs_gen.npy", fake_imgs_save)
 
+## 保存Loss曲线
 plt.subplot(2, 1, 1)
 plt.plot(gloss, '-')
 plt.ylabel('G_loss')
@@ -249,7 +236,7 @@ plt.subplot(2, 1, 2)
 plt.plot(dloss, '-')
 plt.ylabel('D_loss')
 now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) 
-image_name="loss_image_"+now+r".jpg"
+image_name="./loss_image/loss_image_"+now+r".jpg"
 plt.savefig(image_name)
 plt.show()
 print("All Done")

@@ -1,0 +1,8 @@
+numpy
+scipy
+six
+numpy
+pandas
+pytorch
+torchvision
+pymysql
