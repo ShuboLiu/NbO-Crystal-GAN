@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=500, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=100, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
@@ -67,6 +67,9 @@ class Generator(nn.Module):
     def forward(self, z):
         img = self.model(z)
         img = img.view(img.shape[0], 8,3) ##将*img_shape改为8,3
+        ground = imgs[np.random.randint(1, opt.batch_size), :, :]
+        ground = ground.cuda().to(torch.float32)
+        img = img + ground
         return img
 
 
@@ -180,8 +183,7 @@ for epoch in range(opt.n_epochs):
         optimizer_D.zero_grad()
 
         # Sample noise as generator input
-        #z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
-        z = get_z()
+        z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], opt.latent_dim))))
 
         #print("z.shape=", z.shape)
         # Generate a batch of images
@@ -241,10 +243,10 @@ print("We have the fake generation of shape", fake_imgs_save.shape)
 np.save("fake_imgs_gen.npy", fake_imgs_save)
 
 plt.subplot(2, 1, 1)
-plt.plot(gloss, '.')
+plt.plot(gloss, '-')
 plt.ylabel('G_loss')
 plt.subplot(2, 1, 2)
-plt.plot(dloss, '.')
+plt.plot(dloss, '-')
 plt.ylabel('D_loss')
 now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) 
 image_name="loss_image_"+now+r".jpg"
