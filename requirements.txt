@@ -6,3 +6,4 @@ pandas
 pytorch
 torchvision
 pymysql
+matplotlib

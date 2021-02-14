@@ -8,7 +8,7 @@ shutil.rmtree("OUTPUT")
 
 raw_data = np.load(r"fake_imgs_gen.npy")
 print("We have raw data of shape",raw_data.shape)
-
+print(raw_data)
 """
 数据转换
 将晶格常数转换为晶格矢量

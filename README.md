@@ -8,7 +8,8 @@
 ### TODO
 - [Done] 在train.py中加入noising function，基于该循环对应的结构
 - [] 提高训练精度
-
+- [ ] NAS-GAN
+ 
 ### Install and Usage
 
 Please make sure you have python version > 3.6 and torch > 1.7

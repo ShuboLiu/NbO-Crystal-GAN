@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=500, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
@@ -45,7 +45,7 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
 
-        def block(in_feat, out_feat, normalize=True):
+        def block(in_feat, out_feat, normalize=False): #Ture改为False
             layers = [nn.Linear(in_feat, out_feat)]
             if normalize:
                 layers.append(nn.BatchNorm1d(out_feat, 0.8))
@@ -67,7 +67,7 @@ class Generator(nn.Module):
     def forward(self, z):
         img = self.model(z)
         img = img.view(img.shape[0], 8,3) ##将*img_shape改为8,3
-        ground = imgs[np.random.randint(1, opt.batch_size), :, :]
+        ground = imgs[np.random.randint(0, opt.batch_size), :, :]
         ground = ground.cuda().to(torch.float32)
         img = img + ground
         return img
@@ -113,8 +113,8 @@ train_data_raw = np.load(r"3.data_augmentation.npy")
 count_train_data = 0
 total_train_data = train_data_raw.shape[0]*train_data_raw.shape[2]
 train_data = np.zeros(((total_train_data, 8, 3)))
-for i in range(1, train_data_raw.shape[0]):
-    for j in range(1, train_data_raw.shape[1]):
+for i in range(0, train_data_raw.shape[0]):
+    for j in range(0, train_data_raw.shape[1]):
         train_data[count_train_data, :, :] = train_data_raw[i, j, :, :]
 dataloader = torch.utils.data.DataLoader(train_data, batch_size=opt.batch_size, shuffle=True)
 
@@ -156,7 +156,7 @@ import numpy as np
 np.set_printoptions(threshold=np.inf)
 
 batches_done = 0
-fake_imgs_save = np.empty(((1, 8, 3)))
+fake_imgs_save = train_data[0, :, :].reshape(((1, 8, 3)))
 gloss = []; dloss = []
 for epoch in range(opt.n_epochs):
     for i, (imgs) in enumerate(dataloader):
@@ -185,6 +185,7 @@ for epoch in range(opt.n_epochs):
         gradient_penalty = compute_gradient_penalty(discriminator, real_imgs.data, fake_imgs.data)
         # Adversarial loss
         d_loss = -torch.mean(real_validity) + torch.mean(fake_validity) + lambda_gp * gradient_penalty
+        Wasserstein_D = torch.mean(real_validity) - torch.mean(fake_validity)
 
         d_loss.backward()
         optimizer_D.step()

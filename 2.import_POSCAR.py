@@ -6,7 +6,8 @@ import numpy as np
 
 #从OQMD数据库导入NbO id和entry_id文件
 present_dir = os.path.abspath(os.curdir)
-file_path = os.path.join(present_dir, "NbO.csv")
+#file_path = os.path.join(present_dir, "NbO.csv")
+file_path = os.path.join(present_dir, "NbO-2911.csv")
 data = pd.read_csv(file_path,header=None)
 id = data.iloc[0,:]
 entry_id = data.iloc[1,:]
@@ -128,7 +129,8 @@ for i in range(0, len(id)):
 
 output = pd.DataFrame(output)
 print(output)
-output.to_csv("NbO_structure_file.csv", header=None, index=None)
+#output.to_csv("NbO_structure_file.csv", header=None, index=None)
+output.to_csv("NbO_structure_file_2921.csv", header=None, index=None)
 print('All Done')
 
 """
