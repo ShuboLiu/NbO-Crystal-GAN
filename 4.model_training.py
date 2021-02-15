@@ -40,63 +40,23 @@ img_shape = (opt.channels, opt.img_size_0, opt.img_size_1)
 
 cuda = True if torch.cuda.is_available() else False
 
-
-# class Generator(nn.Module):
-#     def __init__(self):
-#         super(Generator, self).__init__()
-
-#         def block(in_feat, out_feat, normalize=False): #Ture改为False
-#             layers = [nn.Linear(in_feat, out_feat)]
-#             if normalize:
-#                 layers.append(nn.BatchNorm1d(out_feat, 0.8))
-#             layers.append(nn.LeakyReLU(0.2, inplace=True))
-#             return layers
-
-#         self.model = nn.Sequential(
-#             *block(opt.latent_dim, 128, normalize=False),
-#             *block(128, 256),
-#             *block(256, 512),
-#             *block(512, 1024),
-#             *block(1024, 512),
-#             *block(512, 256),
-#             *block(256, 128),
-#             *block(128, 256),
-#             *block(256, 512),
-#             *block(512, 1024),
-#             *block(1024, 512),
-#             *block(512, 256),
-#             *block(256, 128),
-#             nn.Linear(128, int(np.prod(img_shape))),
-#             nn.Tanh()
-#         )
-
-#     def forward(self, z):
-#         img = self.model(z)
-#         img = img.view(img.shape[0], 8,3) ##将*img_shape改为1,8,3
-#         based_on_ground = True
-#         if based_on_ground :
-#             ground = imgs[np.random.randint(0, opt.batch_size), :, :]
-#             ground = ground.cuda().to(torch.float32)
-#             img = img + ground
-#         return img
-
 class Generator(nn.Module):
      def __init__(self):
         super(Generator, self).__init__()
-        self.conv1 = nn.Sequential( #input shape (1,28,28)
+        self.conv1 = nn.Sequential( #input shape (1,8,3)
             nn.Conv2d(in_channels=1, #input height 
                       out_channels=16, #n_filter
                       kernel_size=1, #filter size
                       stride=1, #filter step
                       padding=0 #con2d出来的图片大小不变
-                      ), #output shape (16,28,28)
+                      ), #output shape (16,8,3)
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=1) #2x2采样，output shape (16,14,14)
+            nn.MaxPool2d(kernel_size=1) #output shape (16,14,14)
             )
-        self.conv2 = nn.Sequential(nn.Conv2d(16, 32, 1, 1, 0), #output shape (32,7,7)
+        self.conv2 = nn.Sequential(nn.Conv2d(16, 32, 1, 1, 0), #output shape (32,8,3)
                                    nn.ReLU(),
                                    nn.MaxPool2d(1))
-        self.out = nn.Linear(768, 24)
+        self.out = nn.Linear(32*8*3, 8*3)
          
      def forward(self, x):
         x = imgs.view(opt.batch_size, 1, 8, 3).cuda().to(torch.float32)
@@ -116,19 +76,6 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
 
-        # self.model = nn.Sequential(
-        #     nn.Linear(int(np.prod(img_shape)), 512),
-        #     nn.LeakyReLU(0.2, inplace=True),
-        #     nn.Linear(512, 256),
-        #     nn.LeakyReLU(0.2, inplace=True),
-        #     nn.Linear(256, 128),
-        #     nn.LeakyReLU(0.2, inplace=True),
-        #     nn.Linear(128, 256),
-        #     nn.LeakyReLU(0.2, inplace=True),
-        #     nn.Linear(256, 512),
-        #     nn.LeakyReLU(0.2, inplace=True),
-        #     nn.Linear(512, 1),
-        # )
         self.model = nn.Sequential(
             nn.Conv2d(in_channels = 1, out_channels = 512, kernel_size = (1,3), stride = 1, padding = 0),
             nn.BatchNorm2d(512,0.8),nn.LeakyReLU(0.2,inplace=True),
@@ -143,6 +90,7 @@ class Discriminator(nn.Module):
     def forward(self, img):
         img_flat = img.view(img.shape[0], 1, 8, 3)
         validity = self.model(img_flat)
+        #validity = self.softmax(validity)
         return validity
 
 
@@ -275,7 +223,6 @@ for epoch in range(opt.n_epochs):
             batches_done += opt.n_critic
 
 print("We have the fake generation of shape", fake_imgs_save.shape)
-np.save("fake_imgs_gen.npy", fake_imgs_save)
 
 ## 保存Loss曲线
 plt.subplot(3, 1, 1)
@@ -291,4 +238,8 @@ now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time()))
 image_name="./loss_image/loss_image_"+now+r".jpg"
 plt.savefig(image_name)
 plt.show()
+
+npy_name="./loss_image/fake_imgs_gen_"+now+r".npy"
+np.save(npy_name, fake_imgs_save)
+
 print("All Done")

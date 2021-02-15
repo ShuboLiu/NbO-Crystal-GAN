@@ -9,8 +9,8 @@
 
 
 ### TODO
-- [Done] 在train.py中加入noising function，基于该循环对应的结构
-- [] 提高训练精度
+- [x] Add nosing function in 4.model_training.py, based on structure used in this epoch
+- [ ] Further improve accuracy
 - [ ] NAS-GAN
  
 ### Install and Usage
