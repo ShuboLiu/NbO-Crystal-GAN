@@ -7,11 +7,15 @@
 ##### 2021-2-14 Log 2
 - 将Generator和Discriminator均转换为ConvBased网络，其效果较好;
 
+##### 2021-2-16 Log 3
+- 将Generator改为ConvTransp网络，效果较好，产生了有效结构
+
 
 ### TODO
 - [x] Add nosing function in 4.model_training.py, based on structure used in this epoch
-- [ ] Further improve accuracy
+- [x] Further improve accuracy
 - [ ] NAS-GAN
+- [x] Add "Count Element" code
  
 ### Install and Usage
 

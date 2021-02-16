@@ -6,8 +6,7 @@ import numpy as np
 
 #从OQMD数据库导入NbO id和entry_id文件
 present_dir = os.path.abspath(os.curdir)
-#file_path = os.path.join(present_dir, "NbO.csv")
-file_path = os.path.join(present_dir, "NbO-2911.csv")
+file_path = os.path.join(present_dir, "NbO.csv")
 data = pd.read_csv(file_path,header=None)
 id = data.iloc[0,:]
 entry_id = data.iloc[1,:]
@@ -69,13 +68,18 @@ def cal_angle(x, y):
     dot_prod = np.dot(x, y)
     cos = dot_prod/(l_x*l_y)
     angle_arc = np.arccos(cos)
-    angle_degree = angle_arc*180/np.pi
+    arc = True
+    if arc:
+        angle = angle_arc
+    else:
+        angle_degree = angle_arc*180/np.pi
+        angle = angle_degree
 
-    return angle_degree
+    return angle
 
 
 output_length = 6 + max_A*3 + max_B*3
-output = np.zeros((len(id), output_length), dtype = float)
+output = np.empty((len(id), output_length), dtype = float)
 a=[];b=[];c=[];alpha=[];beta=[];gama=[]
 for i in range(0, len(id)):
     print('Second step of id=',id[i],'entry_id=',entry_id[i])
@@ -109,11 +113,11 @@ for i in range(0, len(id)):
     B = B.reshape(1,3)
     C = np.array(output_1.iloc[i, [6, 7, 8]], dtype=float)
     C = C.reshape(1,3)
-    alpha = float(cal_angle(A, B))
+    alpha = float(cal_angle(B, C))
     line.append(alpha)
-    beta = float(cal_angle(B, C))
+    beta = float(cal_angle(A, C))
     line.append(beta)
-    gama = float(cal_angle(C, A))
+    gama = float(cal_angle(B, A))
     line.append(gama)
     for jj in range(5):
         output[i, jj] = line[jj]
@@ -124,13 +128,12 @@ for i in range(0, len(id)):
         output[i, jj+5] = output_1.iat[i, jj+8]
     ## 第二个原子
     for jj in range(3*num_count[i, 1]):
-        output[i, jj+14] = output_1.iat[i, jj+8+num_count[i, 0]*3]
+        output[i, jj+5+3*max_A] = output_1.iat[i, jj+8+num_count[i, 0]*3]
 
 
 output = pd.DataFrame(output)
 print(output)
-#output.to_csv("NbO_structure_file.csv", header=None, index=None)
-output.to_csv("NbO_structure_file_2921.csv", header=None, index=None)
+output.to_csv("NbO_structure_file.csv", header=None, index=None)
 print('All Done')
 
 """

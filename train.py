@@ -197,8 +197,8 @@ def main():
             real_imgs_noise = noising(real_imgs)
 			
             
-            #Nb_label = label[:,:3,:]
-            #o_label = label[:,3:,:]
+            Nb_label = label[:,:3,:]
+            o_label = label[:,3:,:]     
             n_Nb = count_element(Nb_label).reshape(batch_size,)
             n_o = count_element(o_label).reshape(batch_size,)
             natoms = n_Nb + n_o
