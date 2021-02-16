@@ -6,6 +6,7 @@
 # 仅仅忽略项目根目录下的 TODO 文件，不包括 subdir/TODO
 /OUTPUT
 /loss_image
+/Succeed
 # 忽略 build/ 目录下的所有文件
 #POSCAR/
 OUTPUT/

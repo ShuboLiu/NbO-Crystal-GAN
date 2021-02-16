@@ -48,46 +48,8 @@ def weights_init(m):
         init.xavier_uniform_(m.weight)
         init.constant_(m.bias, 0.0)
 
-class Generator_CNN(nn.Module):
-     def __init__(self):
-        super(Generator_CNN, self).__init__()
-        self.conv1 = nn.Sequential( #input shape (1,8,3)
-            nn.Conv2d(in_channels=1, #input height 
-                      out_channels=16, #n_filter
-                      kernel_size=(1,3), #filter size
-                      stride=1, #filter step
-                      padding=0 #con2d出来的图片大小不变
-                      ), #output shape (16,8,3)
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=1) #output shape (16,8,3)
-            )
-        self.conv2 = nn.Sequential(nn.Conv2d(16, 32, (1,1), 1, 0), #output shape (32,8,1)
-                                   nn.ReLU(),
-                                   nn.MaxPool2d(1))
-        self.conv3 = nn.Sequential(nn.Conv2d(32, 64, (1,1), 1, 0), #output shape (64,8,1)
-                                   nn.ReLU(),
-                                   nn.MaxPool2d(1))
-        self.out = nn.Linear(64*opt.img_size_0*1, opt.img_size_0 * opt.img_size_1)
-         
-     def forward(self, x): 
-        """我这里好像忘了用z了"""
-        x = imgs.view(opt.batch_size, 1, opt.img_size_0, opt.img_size_1).cuda().to(torch.float32)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = x.view(x.size(0), -1)
-        output = self.out(x)
-        img = output.reshape(opt.batch_size, opt.img_size_0, opt.img_size_1)
-        based_on_ground = True
-        if based_on_ground :
-            ground = imgs[np.random.randint(0, opt.batch_size), :, :]
-            ground = ground.cuda().to(torch.float32)
-            img = img + ground
-        return img
-
 def noising(imgs):
     imgs = imgs.cpu().numpy().reshape((((opt.batch_size, 1, opt.img_size_0, opt.img_size_1))))
-    #print(imgs.shape)
     batch_size = imgs.shape[0]
     mask = (imgs<0.01)
     a = np.random.normal(10**-3,10**-2.5,(batch_size,1,opt.img_size_0, opt.img_size_1))
@@ -142,7 +104,7 @@ class Generator(nn.Module):
 
         h_flatten = h.view(h.shape[0],-1)
         img = h_flatten.reshape(opt.batch_size, opt.img_size_0, opt.img_size_1)
-        based_on_ground = True
+        based_on_ground = False
         if based_on_ground :
             ground = imgs[np.random.randint(0, opt.batch_size), :, :]
             ground = ground.cuda().to(torch.float32)
@@ -196,11 +158,12 @@ for i in range(0, train_data_raw.shape[0]):
     for j in range(0, train_data_raw.shape[1]):
         train_data[count_train_data, :, :] = train_data_raw[i, j, :, :]
         count_train_data += 1
-if count_train_data = total_train_data+1 :
+if count_train_data == total_train_data :
     print("Data size fits")
 else:
     print("Danger!")
-    break
+    print("count_train_data=",count_train_data, "total_train_data=", total_train_data)
+    os._exit(0)
 
 print(train_data)
 dataloader = torch.utils.data.DataLoader(train_data, batch_size=opt.batch_size, shuffle=True)
