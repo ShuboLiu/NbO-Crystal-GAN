@@ -63,8 +63,8 @@ def cal_angle(x, y):
     #分别计算两向量的模
     #x = x.reshape(3,1)
     y = y.reshape(3,1)
-    l_x = np.linalg.norm(x,ord=1)
-    l_y = np.linalg.norm(y,ord=1)
+    l_x = np.linalg.norm(x,ord=2)
+    l_y = np.linalg.norm(y,ord=2)
     dot_prod = np.dot(x, y)
     cos = dot_prod/(l_x*l_y)
     angle_arc = np.arccos(cos)
@@ -95,13 +95,13 @@ for i in range(0, len(id)):
             cur_line = cur_line.strip()
             cur_line = cur_line.split()
             if j == 2:
-                x = np.linalg.norm(cur_line,ord=1)
+                x = np.linalg.norm(cur_line,ord=2)
                 line.append(x)
             if j == 3:
-                x = np.linalg.norm(cur_line,ord=1)
+                x = np.linalg.norm(cur_line,ord=2)
                 line.append(x)
             if j == 4:
-                x = np.linalg.norm(cur_line,ord=1)
+                x = np.linalg.norm(cur_line,ord=2)
                 line.append(x)
     #计算并保存alpha, beta, gama
     A = output_1.iloc[i, [0, 1, 2]]

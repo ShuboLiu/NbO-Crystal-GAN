@@ -327,7 +327,7 @@ plt.ylabel('W_loss')
 now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) 
 image_name="./loss_image/loss_image_"+now+r".jpg"
 plt.savefig(image_name)
-plt.show()
+#plt.show()
 
 npy_name="./loss_image/fake_imgs_gen.npy"
 np.save(npy_name, fake_imgs_save)
