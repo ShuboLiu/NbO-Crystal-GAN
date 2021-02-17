@@ -51,7 +51,7 @@ def runcmd(command):
     else:
         print("error:",ret)
 
-for i in range(len(data)):
+for i in range(len(data)): 
     dir_name = "./output_vasp/NbO_" + str(i)
     command = 'mpirun -n 8 vasp_std > out'
     print("Excuiting No.", i)
