@@ -18,6 +18,7 @@
 - [x] Add nosing function in 4.model_training.py, based on structure used in this epoch
 - [x] Further improve accuracy
 - [ ] NAS-GAN
+- [ ] Applicable to ternary systems
 - [x] Add "Count Element" code
  
 ### Install and Usage
@@ -53,3 +54,11 @@ Run the following command in working dir
 `python 4.model_training.py`
 
 `python 5.data_post_process.py`
+
+Before the following command, make sure you have properly installed `VASP` and `intel parallel studio` in your local computer or work station. VASP 5.4 and above is recommanded.
+
+`python 6.vasp_test.py`
+
+`python 7.result_eval.py`
+
+After that, you might have to manually adjust perdicted structures and debug. 

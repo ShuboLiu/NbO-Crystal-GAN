@@ -68,6 +68,7 @@ print("Error_4 have", error_4)
 print("Valid structure have",valid_struc)
 
 
+#vasp_valid_struc = [3, ]
 
 # Rerun VASP calculation
 '''
