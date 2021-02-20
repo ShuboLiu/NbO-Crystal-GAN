@@ -3,6 +3,7 @@ import sys
 import numpy as np 
 import shutil
 import subprocess
+import re
 
 np.set_printoptions(threshold=np.inf)
 
@@ -20,76 +21,53 @@ error size 3 [1]: scaLAPACK: Routine ZPOTRF ZTRTRI failed! LAPACK: Routine ZTRTR
     尝试修改INCAR中的ALGO到VERY_FAST
 error size 4 [6]: REAL_OPT: internal ERROR:           0           2          -1           0
     据说要改变ENCUT可解决，实测不可以，太大没影响；太小变成error 1
+error size 5 [9]: KILLED BY SIGNAL: 9 (Killed)
+    伴随“PZSTEIN parameter number    X had an illegal value” 错误
+error size 6 [5]: ERROR in subspace rotation PSSYEVX: not enough eigenvalues found
 """
 
-error_1 = []; error_2 =[]; error_3 = []; error_4 = []; valid_struc = []
+def TrFal(input_num):
+    if input_num <= 0:
+        return False
+    else:
+        return True
+
+error_1 = []; error_2 = []; error_3 = []; 
+error_4 = []; error_5 = []; error_6 = []; 
+valid_struc = []
+Total = list(range(len(data)))
 for i in range(len(data)):
     dir_name = "./output_vasp/NbO_" + str(i)
     out_name = os.path.join(dir_name, "out")
-    error_size_1 = os.path.getsize("./output_vasp/NbO_0/out")
-    error_size_1_2 = os.path.getsize("./output_vasp/NbO_23/out")
-    error_size_2 = os.path.getsize("./output_vasp/NbO_13/out")
-    error_size_2_2 = os.path.getsize("./output_vasp/NbO_29/out")
-    error_size_3 = os.path.getsize("./output_vasp/NbO_1/out")
-    error_size_3_2 = os.path.getsize("./output_vasp/NbO_10/out")
-    error_size_3_3 = os.path.getsize("./output_vasp/NbO_11/out")
-    error_size_4 = os.path.getsize("./output_vasp/NbO_6/out")
-    if os.path.getsize(out_name) == error_size_1:
-        print("Pass: error 1")
+    vasp_output = open(out_name, "r").read()
+    if TrFal(vasp_output.find("internal error in WFINIT: orbitals linearily dependent at random-number initialization")):
         error_1.append(i)
-    elif os.path.getsize(out_name) == error_size_1_2:
-        print("Pass: error 1")
-        error_1.append(i)
-    elif os.path.getsize(out_name) == error_size_2:
-        print("Pass: error 2")
-        error_2.append(i)
-    elif os.path.getsize(out_name) == error_size_2_2:
-        print("Pass: error 2")
-        error_2.append(i)
-    elif os.path.getsize(out_name) == error_size_3:
-        print("Pass: error 3")
+    if TrFal(vasp_output.find("scaLAPACK: Routine ZPOTRF ZTRTRI failed!")) or TrFal(vasp_output.find("LAPACK: Routine ZPOTRF failed!")):
         error_3.append(i)
-    elif os.path.getsize(out_name) == error_size_3_2:
-        print("Pass: error 3")
-        error_3.append(i)
-    elif os.path.getsize(out_name) == error_size_3_3:
-        print("Pass: error 3")
-        error_3.append(i)
-    elif os.path.getsize(out_name) == error_size_4:
-        print("Pass: error 4")
+    if TrFal(vasp_output.find("REAL_OPT: internal ERROR:")):
         error_4.append(i)
-    else :
+    if TrFal(vasp_output.find("KILLED BY SIGNAL: 9 (Killed)")): 
+        error_5.append(i)
+    if TrFal(vasp_output.find("ERROR in subspace rotation PSSYEVX: not enough eigenvalues found")): 
+        error_6.append(i)
+    if TrFal(vasp_output.find("reached required accuracy - stopping structural energy minimisation")): 
         valid_struc.append(i)
+    
 
+Count = list(set(error_1) | set(error_3) | set(error_4) | set(valid_struc))
+error_2 = list(set(Total).difference(set(Count))) 
 print("Error_1 have", error_1)
 print("Error_2 have", error_2)
 print("Error_3 have", error_3)
 print("Error_4 have", error_4)
-print("Valid structure have",valid_struc)
+print("Error_5 have", error_5)
+print("Error_6 have", error_6)
+print("Valid structure have", valid_struc)
 
+print("\n  *** According to the algorithm, you may double check error 2 ***  \n")
 
-#vasp_valid_struc = [3, ]
 
 # Rerun VASP calculation
-'''
-for i in [3,4,5,9,10,11,12,13,23,24,28,35,43,46,48,51,54,57,58,70,72,77,82,83,90,94]:
-    dir_name = "./output_vasp/NbO_" + str(i)
-    out_name = os.path.join(dir_name, "out")
-    command = 'vasp_std > out'
-    print("Excuiting No.", i)
-    #runcmd(command)
-    #os.system('cd ' + dir_name + ' && mpirun -n 8 vasp_std > out')
-    os.system('ulimit -s unlimited')
-    p = subprocess.Popen(
-        command,
-        shell=True,
-        cwd=dir_name,
-    )
-    try:
-        p.wait(120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-'''
 
 '''
 for i in valid_struc:
