@@ -51,6 +51,12 @@ def runcmd(command):
     else:
         print("error:",ret)
 
+def TrFal(input_num):
+    if input_num < 0:
+        return False
+    else:
+        return True
+
 for i in range(len(data)): 
     dir_name = "./output_vasp/NbO_" + str(i)
     command = 'mpirun -n 8 vasp_std > out'
@@ -68,5 +74,14 @@ for i in range(len(data)):
     except subprocess.TimeoutExpired:
         p.kill()
     
+fail_struc = []
+for i in range(len(data)): 
+    dir_name = "./output_vasp/NbO_" + str(i)
+    out_name = os.path.join(dir_name, "out")
+    vasp_output = open(out_name, "r").read()
+    if TrFal(vasp_output.find("POSCAR, INCAR and KPOINTS ok, starting setup")): pass
+    else:
+        fail_struc.append(i)
 
+print("Obtain %.2f%% Chemical Effective Structure " % (1 - len(fail_struc)/len(data)) * 100)
 print("All Done")
