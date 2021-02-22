@@ -19,6 +19,7 @@ import torch.nn.init as init
 
 import matplotlib.pyplot as plt
 import time
+import datetime
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
@@ -219,6 +220,9 @@ else:
 batches_done = 0
 fake_imgs_save = train_data[0, :, :].reshape(((1, opt.img_size_0, opt.img_size_1)))
 gloss = []; dloss = []; wloss = []
+
+start_time = time.time()
+
 for epoch in range(opt.n_epochs):
     for i, (imgs) in enumerate(dataloader):
 
@@ -308,22 +312,27 @@ for epoch in range(opt.n_epochs):
                 fake_imgs = fake_imgs.cpu()
                 fake_imgs_raw = fake_imgs.detach().numpy()
                 fake_imgs_save = np.concatenate((fake_imgs_save, fake_imgs_raw), axis=0)
-                
 
             batches_done += opt.n_critic
 
-print("We have the fake generation of shape", fake_imgs_save.shape)
+end_time = time.time()
+time_used = datetime.timedelta(seconds=(end_time - start_time))
+print("We have the fake generation of shape", fake_imgs_save.shape, "in %s" % time_used)
 
 ## 保存Loss曲线
-plt.subplot(3, 1, 1)
+plt.subplot(4, 1, 1)
 plt.plot(gloss, '-')
 plt.ylabel('G_loss')
-plt.subplot(3, 1, 2)
+plt.subplot(4, 1, 2)
 plt.plot(dloss, '-')
 plt.ylabel('D_loss')
-plt.subplot(3, 1, 3)
+plt.subplot(4, 1, 3)
 plt.plot(wloss, '-')
 plt.ylabel('W_loss')
+plt.subplot(4, 1, 4)
+plt.plot(gloss, color="r", linestyle="-", marker="^")
+plt.plot(dloss, color="b", linestyle="-", marker="s")
+plt.plot(wloss, color="y", linestyle="-", marker="+")
 now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time())) 
 image_name="./loss_image/loss_image_"+now+r".jpg"
 plt.savefig(image_name)
