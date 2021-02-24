@@ -91,7 +91,7 @@ for i in range(0, len(id)):
         line=[]
         cell_number = get_cell_num(file_path)
         for j in range(len(open(file_path,'r').readlines())):
-            cur_line=f.readline()
+            cur_line = f.readline()
             cur_line = cur_line.strip()
             cur_line = cur_line.split()
             if j == 2:

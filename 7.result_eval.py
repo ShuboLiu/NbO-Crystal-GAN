@@ -14,17 +14,23 @@ print("Shape of import data is", data.shape)
 error size 1 [0]: internal error in WFINIT: orbitals linearily dependent at random-number initialization
 error size 2 [13]: Unreasonable structure, VASP will ignore
 error size 3 [1]: scaLAPACK: Routine ZPOTRF ZTRTRI failed! LAPACK: Routine ZTRTRI failed!
-    尝试修改晶格常数（一般扩大）;
-    尝试修改INCAR中的ALGO到VERY_FAST
+    Increase Lattice Parameter
+    Motify ALGO to V in INCAR
 error size 4 [6]: REAL_OPT: internal ERROR:           0           2          -1           0
-    据说要改变ENCUT可解决，实测不可以，太大没影响；太小变成error 1
+    Change ENCUT in INCAR; seems doesn't work
 error size 5 [9]: KILLED BY SIGNAL: 9 (Killed)
-    伴随“PZSTEIN parameter number    X had an illegal value” 错误
-    参见：http://www.error.wiki/Exit_status_of_rank_9:_killed_by_signal_9
-    尝试添加 LHFCALC = .TRUE.
+    with error "PZSTEIN parameter number    X had an illegal value"
+    See: http://www.error.wiki/Exit_status_of_rank_9:_killed_by_signal_9
+    Add LHFCALC = .TRUE. in INCAR
 error size 6 [5]: ERROR in subspace rotation PSSYEVX: not enough eigenvalues found
-    参见: http://www.error.wiki/ERROR_in_subspace_rotation_PSSYEVX:_not_enough_eigenvalues_found
-    尝试将AlGO改为Normal
+    See: http://www.error.wiki/ERROR_in_subspace_rotation_PSSYEVX:_not_enough_eigenvalues_found
+    Change ALGO to Normal in INCAR
+error size 7 [2]: Error EDDDAV: Call to ZHEGV failed.
+    See: http://www.error.wiki/Error_EDDDAV:_Call_to_ZHEGV_failed
+    Change ALGO, Reduce ENCAR
+error size 8 [7]: ERROR in subspace rotation PSSYEVX: I2,IFAIL=
+    See: https://www.vasp.at/forum/viewtopic.php?t=11168
+    Change IALGO = 38, NUPDOWN = 2
 """
 
 def TrFal(input_num):
