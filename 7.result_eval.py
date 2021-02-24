@@ -91,6 +91,37 @@ if auto_debug_mode :
         INCAR_dir = os.path.join(dir_name, "INCAR")
         shutil.copyfile("./POSCAR/TroubleShooting/error_6/INCAR", INCAR_dir)
 
+
+auto_debug_mode = True
+if auto_debug_mode :
+    rerun = []
+    for i in error_5:
+        dir_name = "./output_vasp/NbO_" + str(i)
+        out_name = get_out_file(i, dir_name)
+        INCAR_dir = os.path.join(dir_name, "INCAR")
+        shutil.copyfile("./POSCAR/TroubleShooting/error_5/INCAR", INCAR_dir)
+        rerun.append(i)
+    for i in error_6:
+        dir_name = "./output_vasp/NbO_" + str(i)
+        out_name = get_out_file(i, dir_name)
+        INCAR_dir = os.path.join(dir_name, "INCAR")
+        shutil.copyfile("./POSCAR/TroubleShooting/error_6/INCAR", INCAR_dir)
+        rerun.append(i)
+    for i in error_3:
+        dir_name = "./output_vasp/NbO_" + str(i)
+        out_name = get_out_file(i, dir_name)
+        POSCAR_dir = dir_name + '/POSCAR'
+        POSCAR = []
+        with open(POSCAR_dir, "r") as f:
+            for index in range(len(open(POSCAR_dir,'r').readlines())):
+                POSCAR.append(f.readline())
+            POSCAR[1] = str(float(POSCAR[1]) + 0.3) + ' \n'
+        with open(POSCAR_dir, 'w+') as f_n:
+            for index in range(len(POSCAR)):
+                content = POSCAR[index]
+                f_n.write(content)
+        rerun.append(i)
+
 # Rerun VASP calculation
 
 '''
