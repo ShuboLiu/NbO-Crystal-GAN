@@ -43,7 +43,7 @@ con = pymysql.connect(host = "[host address]",
 
 ##### Run
 
-Run the following command in working dir
+Run the following command in working direction
 
 `python 1.download_POSCAR.py`
 
