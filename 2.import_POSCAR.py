@@ -32,7 +32,7 @@ def get_cell_num(file_path):
 
 output_1=[];num_count=[]
 for i in range(0, len(id)):
-    print('First step of id=',id[i],'entry_id=',entry_id[i])
+    print('First step of id=', id[i],'entry_id=', entry_id[i])
     id_i=id[i]
     file_name=str(id_i)
     file_dir_path=os.path.join(POSCAR_dir_path, str(entry_id[i]))

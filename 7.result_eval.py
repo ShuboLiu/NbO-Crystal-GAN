@@ -92,7 +92,7 @@ if auto_debug_mode :
         shutil.copyfile("./POSCAR/TroubleShooting/error_6/INCAR", INCAR_dir)
 
 
-auto_debug_mode = True
+auto_debug_mode = False
 if auto_debug_mode :
     rerun = []
     for i in error_5:

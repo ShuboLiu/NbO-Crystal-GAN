@@ -8,6 +8,7 @@
 /loss_image
 /Succeed
 /output_vasp
+/NbO_3
 # 忽略 build/ 目录下的所有文件
 #POSCAR/
 OUTPUT/
