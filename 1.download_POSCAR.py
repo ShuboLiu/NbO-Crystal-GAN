@@ -17,7 +17,7 @@ print(entry_id.shape)
 print(id.shape)
 
 #开始下载POSCAR文件
-for i in range(1, len(id)):
+for i in range(len(id)):
     id_i=id[i]
     id_int=str(int(id_i))
     url = 'http://oqmd.org/materials/export/primitive/poscar/'+id_int
@@ -32,7 +32,6 @@ for i in range(1, len(id)):
         command='wget ' + url + ' -O ' + id_int #+ ' --tries=5 -o wget.log'
         args = [r"C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe", command]
         #os.system(command) ## 用于linux主机
-        print(out_path)
         subprocess.run(args, shell=False, cwd=out_path)
         time.sleep(1)
         print(out_name + ' 下载成功')

@@ -7,7 +7,7 @@ import numpy as np
 #从OQMD数据库导入NbO id和entry_id文件
 present_dir = os.path.abspath(os.curdir)
 file_path = os.path.join(present_dir, "NbO.csv")
-data = pd.read_csv(file_path,header=None)
+data = pd.read_csv(file_path, header=None)
 id = data.iloc[0,:]
 entry_id = data.iloc[1,:]
 print(entry_id.shape)
