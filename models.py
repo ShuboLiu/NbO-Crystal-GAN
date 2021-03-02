@@ -39,7 +39,9 @@ class Discriminator(nn.Module):
     def __init__(self,opt):
         super(Discriminator, self).__init__()
         self.model = nn.Sequential(nn.Conv2d(in_channels = 1, out_channels = 512, kernel_size = (1,3), stride = 1, padding = 0),
-                                   nn.LeakyReLU(0.2, inplace=True),nn.Conv2d(in_channels = 512, out_channels = 512, kernel_size = (1,1), stride = 1, padding = 0),                                                                             nn.LeakyReLU(0.2,inplace=True),nn.Conv2d(in_channels = 512, out_channels = 256, kernel_size= (1,1), stride = 1, padding = 0),                                                                               nn.LeakyReLU(0.2,inplace=True))
+                                   nn.LeakyReLU(0.2, inplace=True),nn.Conv2d(in_channels = 512, out_channels = 512, kernel_size = (1,1), stride = 1, padding = 0), 
+                                   nn.LeakyReLU(0.2,inplace=True),nn.Conv2d(in_channels = 512, out_channels = 256, kernel_size= (1,1), stride = 1, padding = 0),
+                                   nn.LeakyReLU(0.2,inplace=True))
 
         self.avgpool_mg = nn.AvgPool2d(kernel_size = (8,1))
         self.avgpool_o = nn.AvgPool2d(kernel_size = (12,1))

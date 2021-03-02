@@ -12,6 +12,7 @@
 - [x] Add nosing function in 4.model_training.py, based on structure used in this epoch
 - [ ] Further improve accuracy
 - [ ] NAS-GAN
+- [x] Add "Count Element" code
  
 ### Install and Usage
 
