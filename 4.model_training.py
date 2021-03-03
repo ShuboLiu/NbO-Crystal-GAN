@@ -28,7 +28,7 @@ parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first 
 parser.add_argument("--b2", type=float, default=0.999, help="adam: decay of first order momentum of gradient")
 parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation")
 parser.add_argument("--latent_dim", type=int, default=100, help="dimensionality of the latent space")
-parser.add_argument("--img_size_0", type=int, default=4, help="size of each image dimension")
+parser.add_argument("--img_size_0", type=int, default=3, help="size of each image dimension")
 parser.add_argument("--img_size_1", type=int, default=3, help="size of each image dimension")
 parser.add_argument("--channels", type=int, default=1, help="number of image channels")
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
@@ -49,10 +49,10 @@ def weights_init(m):
         init.constant_(m.bias, 0.0)
 
 def noising(imgs):
-    imgs = imgs.cpu().numpy().reshape((((opt.batch_size, 1, opt.img_size_0, opt.img_size_1))))
+    imgs = imgs.cpu().numpy().reshape((((opt.batch_size, 1, num_rows, opt.img_size_1))))
     batch_size = imgs.shape[0]
     mask = (imgs<0.01)
-    a = np.random.normal(10**-3,10**-2.5,(batch_size,1,opt.img_size_0, opt.img_size_1))
+    a = np.random.normal(10**-3,10**-2.5,(batch_size,1,num_rows, opt.img_size_1))
     noise = mask*abs(a)
     imgs_after_noising = imgs + noise
     imgs_after_noising = torch.tensor(imgs_after_noising)
@@ -85,7 +85,7 @@ class Generator(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, z, fake_labels_Nb, fake_labels_o, natoms_fake):
-        x = imgs.view(opt.batch_size, 1, opt.img_size_0, opt.img_size_1).cuda().to(torch.float32)
+        x = imgs.view(opt.batch_size, 1, num_rows, opt.img_size_1).cuda().to(torch.float32)
         #cell_param = np.random.randint(0, 3, opt.batch_size)
         #c1 = x[:, :, 2:5, :]
         #c2 = x[:, :, 5:8, :]
@@ -96,14 +96,14 @@ class Generator(nn.Module):
         gen_input = torch.cat((z, fake_labels_Nb, fake_labels_o, natoms_fake), -1)
         #print(gen_input.shape)
         h = self.l1(gen_input)
-        h = h.view(h.shape[0], 128, opt.img_size_0, 1)
+        h = h.view(h.shape[0], 128, num_rows, 1)
         h = self.map1(h)
         h = self.map2(h)
         h = self.map3(h)
         h = self.map4(h)
 
         h_flatten = h.view(h.shape[0],-1)
-        img = h_flatten.reshape(opt.batch_size, opt.img_size_0, opt.img_size_1)
+        img = h_flatten.reshape(opt.batch_size, num_rows, opt.img_size_1)
         based_on_ground = False
         if based_on_ground :
             ground = imgs[np.random.randint(0, opt.batch_size), :, :]
@@ -131,7 +131,7 @@ class Discriminator(nn.Module):
         self.softmax = nn.Softmax2d()
 
     def forward(self, img):
-        img_flat = img.view(img.shape[0], 1, opt.img_size_0, opt.img_size_1)
+        img_flat = img.view(img.shape[0], 1, num_rows, opt.img_size_1)
         validity = self.model(img_flat)
         #validity = self.softmax(validity) ##实践证明，用了Softmax之后Loss直接起飞
         return validity
@@ -150,19 +150,21 @@ if cuda:
 
 # Configure data loader
 train_data_raw = np.load(r"3.data_augmentation.npy")
+num_atoms = train_data_raw.shape[2] - 2
+num_rows = train_data_raw.shape[2]
+print(train_data_raw.shape)
 count_train_data = 0
 total_train_data = train_data_raw.shape[0]*train_data_raw.shape[1]
-#train_data = np.zeros(((total_train_data, opt.img_size_0, opt.img_size_1)))
-train_data = np.empty((total_train_data, opt.img_size_0, opt.img_size_1), dtype = float)
-for i in range(0, train_data_raw.shape[0]):
-    for j in range(0, train_data_raw.shape[1]):
+train_data = np.empty((total_train_data, num_rows, opt.img_size_1), dtype = float)
+for i in range(train_data_raw.shape[0]):
+    for j in range(train_data_raw.shape[1]):
         train_data[count_train_data, :, :] = train_data_raw[i, j, :, :]
         count_train_data += 1
 if count_train_data == total_train_data :
     print("Data size fits")
 else:
     print("Danger!")
-    print("count_train_data=",count_train_data, "total_train_data=", total_train_data)
+    print("count_train_data=", count_train_data, "total_train_data=", total_train_data)
     os._exit(0)
 
 print(train_data)
@@ -217,7 +219,7 @@ else:
     print("discriminator weights are initialized")
 
 batches_done = 0
-fake_imgs_save = train_data[0, :, :].reshape(((1, opt.img_size_0, opt.img_size_1)))
+fake_imgs_save = train_data[0, :, :].reshape(((1, num_rows, opt.img_size_1)))
 gloss = []; dloss = []; wloss = []
 for epoch in range(opt.n_epochs):
     for i, (imgs) in enumerate(dataloader):

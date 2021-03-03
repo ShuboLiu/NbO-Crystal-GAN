@@ -30,9 +30,9 @@ def get_cell_num(file_path):
     return total
 
 
-output_1=[];num_count=[]
+output_1=[]; num_count=[]
 for i in range(0, len(id)):
-    print('First step of id=',id[i],'entry_id=',entry_id[i])
+    #print('First step of id=',id[i],'entry_id=',entry_id[i])
     id_i=id[i]
     file_name=str(id_i)
     file_dir_path=os.path.join(POSCAR_dir_path, str(entry_id[i]))
@@ -55,16 +55,22 @@ for i in range(0, len(id)):
         output_1.append(line)
 
 output_1=pd.DataFrame(output_1)
-num_count = np.array(num_count,dtype=int)
+print("Shape of POSCAR data", output_1.shape)
+npy_name="./POSCAR/POSCAR.npy"
+np.save(npy_name, output_1)
+num_count = np.array(num_count, dtype=int)
+# 双原子体系
 max_A = np.max(num_count[:,0])
+print("max number of atom A is", max_A)
 max_B = np.max(num_count[:,1])
+print("max number of atom B is", max_B)
 
 def cal_angle(x, y):
     #分别计算两向量的模
     #x = x.reshape(3,1)
     y = y.reshape(3,1)
-    l_x = np.linalg.norm(x,ord=2)
-    l_y = np.linalg.norm(y,ord=2)
+    l_x = np.linalg.norm(x, ord=2)
+    l_y = np.linalg.norm(y, ord=2)
     dot_prod = np.dot(x, y)
     cos = dot_prod/(l_x*l_y)
     angle_arc = np.arccos(cos)
@@ -82,7 +88,7 @@ output_length = 6 + max_A*3 + max_B*3
 output = np.empty((len(id), output_length), dtype = float)
 a=[];b=[];c=[];alpha=[];beta=[];gama=[]
 for i in range(0, len(id)):
-    print('Second step of id=',id[i],'entry_id=',entry_id[i])
+    #print('Second step of id=',id[i],'entry_id=',entry_id[i])
     id_i=id[i]
     file_name=str(id_i)
     file_dir_path=os.path.join(POSCAR_dir_path, str(entry_id[i]))
