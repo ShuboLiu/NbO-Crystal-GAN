@@ -42,6 +42,7 @@ def TrFal(input_num):
 error_1 = []; error_2 = []; error_3 = []; 
 error_4 = []; error_5 = []; error_6 = []; 
 valid_struc = []
+not_small = []
 Total = list(range(len(data)))
 for i in range(len(data)):
     dir_name = "./output_vasp/NbO_" + str(i)
@@ -52,6 +53,9 @@ for i in range(len(data)):
     if TrFal(vasp_output.find("POSCAR, INCAR and KPOINTS ok, starting setup")): pass
     else:
         error_2.append(i) # error_2 structures should be skipped
+    if TrFal(vasp_output.find("The distance between some ions is very small ")): pass
+    else:
+        not_small.append(i)
     if TrFal(vasp_output.find("scaLAPACK: Routine ZPOTRF ZTRTRI failed!")) or TrFal(vasp_output.find("LAPACK: Routine ZPOTRF failed!")):
         error_3.append(i)
     if TrFal(vasp_output.find("REAL_OPT: internal ERROR:")):
@@ -66,6 +70,7 @@ for i in range(len(data)):
 
 Count = list(set(error_1) | set(error_2) |set(error_3) | set(error_4) | set(error_5) | set(error_6)| set(valid_struc))
 other = list(set(Total).difference(set(Count))) 
+vail_and_not_small = list(set(valid_struc) & set(not_small))
 print("Error_1 have", error_1)
 print("Error_2 have", error_2)
 print("Error_3 have", error_3)
@@ -74,6 +79,7 @@ print("Error_5 have", error_5)
 print("Error_6 have", error_6)
 print("Error_Other have", other)
 print("Valid structure have", valid_struc)
+print("Vail_and_not_small have", vail_and_not_small)
 
 print("\n  *** According to the algorithm, you may double check 'other' ***  \n")
 
